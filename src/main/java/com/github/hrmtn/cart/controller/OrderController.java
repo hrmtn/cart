@@ -20,9 +20,13 @@ public class OrderController {
         return orderService.validate();
     }
 
-    @GetMapping("/{orderId}/status")
-    public Mono<OrderStatusDTO> getStatus(@PathVariable UUID orderId) {
-        return orderService.getStatus(orderId).map(OrderStatusDTO::new);
+    @GetMapping("/{id}/status")
+    public Mono<OrderStatusDTO> getStatus(@PathVariable UUID id) {
+        return orderService.getStatus(id).map(OrderStatusDTO::new);
     }
 
+    @PostMapping("/{id}/cancel")
+    public Mono<Void> cancel(@PathVariable UUID id) {
+        return orderService.cancel(id);
+    }
 }

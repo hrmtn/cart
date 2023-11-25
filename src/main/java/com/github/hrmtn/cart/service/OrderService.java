@@ -24,6 +24,25 @@ public class OrderService {
         return orderRepository.findById(id).map(Order::getOrderStatus);
     }
 
+    public Mono<Void> cancel(UUID id) {
+        return orderRepository.findById(id)
+                .filter(order -> order.getCreatedAt().isAfter(Instant.now().minusSeconds(3600)))
+                .map(order -> {
+                    order.setOrderStatus(OrderStatus.CANCELED.getStatus());
+                    return order;
+                })
+                .flatMap(order -> orderRepository.updateStatus(order.getId(), order.getOrderStatus()).thenReturn(order))
+                .flatMapMany(order -> ordersProductsRepository.findAllByOrderId(order.getId()))
+                .flatMap(orderProduct -> productService.findById(orderProduct.getProductId())
+                        .map(product -> {
+                            product.setQuantity(product.getQuantity() + orderProduct.getQuantity());
+                            return product;
+                        })
+                        .flatMap(productService::save)
+                )
+                .then();
+    }
+
     private record ProductAndCartItem(Product product, CartItem cartItem ) {}
 
     public Mono<UUID> validate() {
