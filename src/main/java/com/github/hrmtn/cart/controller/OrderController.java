@@ -1,10 +1,9 @@
 package com.github.hrmtn.cart.controller;
 
+import com.github.hrmtn.cart.dto.OrderStatusDTO;
 import com.github.hrmtn.cart.service.OrderService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -19,6 +18,11 @@ public class OrderController {
     @PostMapping("/validate")
     Mono<UUID> validate() {
         return orderService.validate();
+    }
+
+    @GetMapping("/{orderId}/status")
+    public Mono<OrderStatusDTO> getStatus(@PathVariable UUID orderId) {
+        return orderService.getStatus(orderId).map(OrderStatusDTO::new);
     }
 
 }

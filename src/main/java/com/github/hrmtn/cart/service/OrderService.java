@@ -20,6 +20,10 @@ public class OrderService {
     private final ProductService productService;
     private final CartItemRepository cartItemRepository;
 
+    public Mono<String> getStatus(UUID id) {
+        return orderRepository.findById(id).map(Order::getOrderStatus);
+    }
+
     private record ProductAndCartItem(Product product, CartItem cartItem ) {}
 
     public Mono<UUID> validate() {
