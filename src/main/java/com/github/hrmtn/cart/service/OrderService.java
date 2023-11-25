@@ -43,6 +43,10 @@ public class OrderService {
                 .then();
     }
 
+    public Mono<Void> complete(UUID id) {
+        return orderRepository.updateStatus(id, OrderStatus.DELIVERED.getStatus());
+    }
+
     private record ProductAndCartItem(Product product, CartItem cartItem ) {}
 
     public Mono<UUID> validate() {
