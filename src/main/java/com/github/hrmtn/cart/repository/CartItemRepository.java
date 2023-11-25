@@ -13,4 +13,6 @@ public interface CartItemRepository extends ReactiveCrudRepository<CartItem, Lon
 
     @Query("UPDATE cart_items SET quantity = :quantity WHERE user_id = :userId AND product_id = :productId")
     Mono<Void> updateQuantity(Long userId, String productId, Long quantity);
+
+    Flux<Object> deleteAllByProductIdAndUserId(String productId, Long userId);
 }

@@ -47,4 +47,21 @@ public class CartService {
     public Flux<CartItem> getCartProducts() {
         return cartItemRepository.findAllByUserId(User.USER_ID);
     }
+
+    public Mono<Void> removeFromCart(String productId) {
+        return cartItemRepository.findCartItemByProductIdAndUserId(productId, User.USER_ID)
+                .flatMap(cartItem -> {
+                    return cartItemRepository.deleteAllByProductIdAndUserId(cartItem.getProductId(), cartItem.getUserId())
+                            .then(Mono.fromCallable(() -> cartItem));
+                })
+                .flatMap(cartItem -> {
+                    return productService.findById(UUID.fromString(cartItem.getProductId()))
+                            .map(product -> {
+                                product.setQuantity(product.getQuantity() + cartItem.getQuantity());
+                                return product;
+                            });
+                })
+                .flatMap(productService::save)
+                .then();
+    }
 }

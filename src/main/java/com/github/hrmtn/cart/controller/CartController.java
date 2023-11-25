@@ -24,12 +24,15 @@ public class CartController {
         return service.addToCart(cartItem);
     }
 
-
     @GetMapping()
     public Flux<CartItemDto> listCartProducts() {
         return service.getCartProducts().map(mapper::toDTO);
     }
 
+    @DeleteMapping("/{id}")
+    public Mono<Void> removeFromCart(@PathVariable String id) {
+        return service.removeFromCart(id);
+    }
 
 }
 
