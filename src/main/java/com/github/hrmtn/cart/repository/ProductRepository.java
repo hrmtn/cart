@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @Repository
-public interface ProductRepository extends ReactiveCrudRepository<Product, UUID> {
+public interface ProductRepository extends ReactiveCrudRepository<Product, String> {
     @Query("SELECT * FROM products WHERE quantity > 0")
     Flux<Product> findAvailable();
 

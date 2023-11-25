@@ -14,20 +14,25 @@ import java.util.UUID;
 @Data
 @Builder
 @Table("products")
-public class Product implements Persistable<UUID> {
+public class Product implements Persistable<String> {
 
     public static final String AVAILABLE_PRODUCTS_CACHE_NAME = "available_products";
 
     @Id
-    private UUID id;
+    private String id;
     private String name;
     private BigDecimal price;
     private Long quantity;
 
     @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
     @Transient
     public boolean isNew() {
-        return id == null || !StringUtils.hasText(id.toString());
+        return !StringUtils.hasText(id);
     }
 
 }

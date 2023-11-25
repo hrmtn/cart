@@ -23,7 +23,7 @@ public class ProductService {
     }
 
     public Mono<Product> findById(UUID id) {
-        return productRepository.findById(id)
+        return productRepository.findById(id.toString())
                 .switchIfEmpty(Mono.error(new RuntimeException("Product not found")));
     }
 

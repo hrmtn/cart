@@ -22,6 +22,11 @@ public class Order implements Persistable<UUID> {
     }
 
     @Override
+    public UUID getId() {
+        return this.id;
+    }
+
+    @Override
     public boolean isNew() {
         return true;
     }
