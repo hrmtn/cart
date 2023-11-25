@@ -1,6 +1,7 @@
 package com.github.hrmtn.cart.controller;
 
-import com.github.hrmtn.cart.domain.Product;
+import com.github.hrmtn.cart.dto.ProductDTO;
+import com.github.hrmtn.cart.dto.mapper.ProductMapper;
 import com.github.hrmtn.cart.service.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +15,11 @@ import reactor.core.publisher.Flux;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
     @GetMapping
-    public Flux<Product> availableProducts() {
-        return productService.findAvailable();
+    public Flux<ProductDTO> availableProducts() {
+        return productService.findAvailable().map(productMapper::toDTO);
     }
 
 }
