@@ -25,7 +25,7 @@ public class Product implements Persistable<UUID> {
     @Override
     @Transient
     public boolean isNew() {
-        return true;
+        return id == null || !StringUtils.hasText(id.toString());
     }
 
 }

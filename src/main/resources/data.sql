@@ -5,6 +5,14 @@ CREATE TABLE IF NOT EXISTS products (
                                         quantity INT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS cart_items (
+                                          product_id VARCHAR(255) NOT NULL,
+                                          user_id INT NOT NULL,
+                                          quantity INT NOT NULL,
+                                          PRIMARY KEY (product_id, user_id),
+                                          FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
 INSERT INTO products (id, name, price, quantity)
 VALUES
     ('becd5e12-defd-4238-8739-5ac69fb06b0f', 'H8 LED', 30, 11),

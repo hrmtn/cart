@@ -1,6 +1,6 @@
 package com.github.hrmtn.cart.controller;
 
-import com.github.hrmtn.cart.dto.ProductDTO;
+import com.github.hrmtn.cart.dto.ProductDto;
 import com.github.hrmtn.cart.dto.mapper.ProductMapper;
 import com.github.hrmtn.cart.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ public class ProductController {
     private final ProductMapper productMapper;
 
     @GetMapping
-    public Flux<ProductDTO> availableProducts() {
+    public Flux<ProductDto> availableProducts() {
         return productService.findAvailable().map(productMapper::toDTO);
     }
 
