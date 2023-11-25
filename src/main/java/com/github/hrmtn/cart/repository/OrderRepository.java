@@ -15,5 +15,5 @@ public interface OrderRepository extends ReactiveCrudRepository<Order, UUID> {
     Flux<Order> findAllBy(Long userId);
 
     @Query("UPDATE orders SET order_status = :orderStatus WHERE id = :id")
-    Mono<Void> updateStatus(UUID id, String orderStatus);
+    Mono<Void> updateStatus(String id, String orderStatus);
 }

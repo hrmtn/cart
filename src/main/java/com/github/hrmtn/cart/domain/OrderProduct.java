@@ -10,8 +10,8 @@ import java.util.UUID;
 @Table("orders_products")
 public class OrderProduct {
     private Long userId;
-    private UUID orderId;
-    private UUID productId;
+    private String orderId;
+    private String productId;
     private Long quantity;
     private BigDecimal price;
 }

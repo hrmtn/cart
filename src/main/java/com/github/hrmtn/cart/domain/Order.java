@@ -6,23 +6,23 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 @Table("orders")
-public class Order implements Persistable<UUID> {
+public class Order implements Persistable<String> {
 
     @Id
-    private UUID id;
+    private String id;
+    private Long userId;
     private String orderStatus = OrderStatus.CREATED.getStatus();
     private Instant createdAt;
 
-    public Order(UUID id) {
+    public Order(String id) {
         this.id = id;
     }
 
     @Override
-    public UUID getId() {
+    public String getId() {
         return this.id;
     }
 

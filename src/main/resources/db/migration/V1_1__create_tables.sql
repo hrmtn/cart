@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
 
 CREATE TABLE IF NOT EXISTS orders (
                                       id VARCHAR(64) PRIMARY KEY,
+                                      user_id INT NOT NULL,
                                       order_status VARCHAR(64),
                                       created_at TIMESTAMP
 );

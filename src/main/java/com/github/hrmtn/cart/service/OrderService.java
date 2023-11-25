@@ -1,14 +1,18 @@
 package com.github.hrmtn.cart.service;
 
 import com.github.hrmtn.cart.domain.*;
+import com.github.hrmtn.cart.dto.OrderDetails;
 import com.github.hrmtn.cart.repository.CartItemRepository;
 import com.github.hrmtn.cart.repository.OrderRepository;
 import com.github.hrmtn.cart.repository.OrdersProductsRepository;
+import com.github.hrmtn.cart.utils.AppUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.UUID;
 
 @Service
@@ -44,33 +48,57 @@ public class OrderService {
     }
 
     public Mono<Void> complete(UUID id) {
-        return orderRepository.updateStatus(id, OrderStatus.DELIVERED.getStatus());
+        return orderRepository.updateStatus(id.toString(), OrderStatus.DELIVERED.getStatus());
+    }
+
+    public Mono<OrderDetails> getOrderDetails(UUID orderId) {
+        OrderDetails orderDetails = new OrderDetails();
+        return orderRepository.findById(orderId)
+                .flatMapMany(order -> {
+                    orderDetails.setOrderId(order.getId());
+                    orderDetails.setStatus(order.getOrderStatus());
+                    orderDetails.setCreatedAt(AppUtils.formatDate(order.getCreatedAt()));
+                    orderDetails.setUserId(order.getUserId());
+                    return ordersProductsRepository.findAllByOrderId(String.valueOf(orderId));
+                })
+                .collectMultimap(OrderProduct::getOrderId)
+                .map(orderIdToOrderProducts -> {
+                    orderDetails.setPrice(orderIdToOrderProducts.values().stream()
+                            .flatMap(Collection::stream)
+                            .map(orderProduct -> orderProduct.getPrice().multiply(BigDecimal.valueOf(orderProduct.getQuantity())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add));
+                    orderDetails.setProducts(orderIdToOrderProducts.values().iterator().next().stream().map(OrderDetails.ProductDetail::fromOrderProduct).toList());
+                    return orderDetails;
+                });
+
     }
 
     private record ProductAndCartItem(Product product, CartItem cartItem ) {}
 
     public Mono<UUID> validate() {
 
-        var order = new Order(UUID.randomUUID());
+        var order = new Order(UUID.randomUUID().toString());
         order.setCreatedAt(Instant.now());
+        order.setUserId(User.USER_ID);
 
         return orderRepository.save(order)
                 .flatMapMany(savedOrder -> this.cartItemRepository.findAllByUserId(User.USER_ID))
-                .flatMap(cartItem -> productService.findById(UUID.fromString(cartItem.getProductId()))
+                .flatMap(cartItem -> productService.findById(cartItem.getProductId())
                         .map(product -> new OrderService.ProductAndCartItem(product, cartItem))
                 )
                 .flatMap(productAndCartItem -> {
                     OrderProduct orderProduct = new OrderProduct();
                     orderProduct.setUserId(User.USER_ID);
                     orderProduct.setOrderId(order.getId());
-                    orderProduct.setProductId(UUID.fromString(productAndCartItem.cartItem().getProductId()));
+                    orderProduct.setProductId(productAndCartItem.cartItem().getProductId());
                     orderProduct.setQuantity(productAndCartItem.cartItem().getQuantity());
                     orderProduct.setPrice(productAndCartItem.product().getPrice());
                     return ordersProductsRepository.save(orderProduct);
                 })
                 .flatMap(orderProduct -> cartItemRepository.deleteAllByProductIdAndUserId(String.valueOf(orderProduct.getProductId()), User.USER_ID)
                         .thenReturn(orderProduct.getOrderId()))
-                .last();
+                .last()
+                .map(UUID::fromString);
 
     }
 

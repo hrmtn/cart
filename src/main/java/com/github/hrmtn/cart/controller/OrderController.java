@@ -1,11 +1,9 @@
 package com.github.hrmtn.cart.controller;
 
-import com.github.hrmtn.cart.domain.Order;
+import com.github.hrmtn.cart.dto.OrderDetails;
 import com.github.hrmtn.cart.dto.OrderStatusDTO;
 import com.github.hrmtn.cart.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
@@ -32,7 +30,6 @@ public class OrderController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Order validated"),
             @ApiResponse(responseCode = "500", description = "Something went wrong") })
-    @GetMapping("/{id}")
     @PostMapping("/validate")
     Mono<UUID> validate() {
         return orderService.validate();
@@ -45,14 +42,7 @@ public class OrderController {
     @GetMapping("/{id}/status")
     public Mono<EntityModel<OrderStatusDTO>> getStatus(@PathVariable UUID id) {
         return orderService.getStatus(id).map(OrderStatusDTO::new)
-                .flatMap(dto -> {
-                    List<Mono<Link>> links = List.of(
-                            linkTo(methodOn(OrderController.class).complete(id)).withRel("complete").toMono(),
-                            linkTo(methodOn(OrderController.class).cancel(id)).withRel("cancel").toMono());
-                    return Flux.concat(links)
-                            .collectList()
-                            .map(link -> EntityModel.of(dto, link));
-                });
+                .flatMap(dto -> addLinksToOrderDetails(dto, id.toString()));
     }
 
     @PostMapping("/{id}/cancel")
@@ -63,6 +53,21 @@ public class OrderController {
     @PostMapping("/{id}/complete")
     public Mono<Void> complete(@PathVariable UUID id) {
         return orderService.complete(id);
+    }
+
+    @GetMapping("/{id}")
+    public Mono<EntityModel<OrderDetails>> getOrder(@PathVariable UUID id) {
+        return orderService.getOrderDetails(id)
+                .flatMap(dto -> addLinksToOrderDetails(dto, id.toString()));
+    }
+
+    private <T> Mono<EntityModel<T>> addLinksToOrderDetails(T model, String orderId) {
+        List<Mono<Link>> links = List.of(
+                linkTo(methodOn(OrderController.class).complete(UUID.fromString(orderId))).withRel("complete").toMono(),
+                linkTo(methodOn(OrderController.class).cancel(UUID.fromString(orderId))).withRel("cancel").toMono());
+        return Flux.concat(links)
+                .collectList()
+                .map(link -> EntityModel.of(model, link));
     }
 
 }

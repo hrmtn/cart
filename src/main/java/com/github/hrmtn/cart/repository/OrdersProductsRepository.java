@@ -9,6 +9,6 @@ import java.util.UUID;
 public interface OrdersProductsRepository extends ReactiveCrudRepository<OrderProduct, UUID> {
 
     Flux<OrderProduct> findAllByUserId(Long userId);
-    Flux<OrderProduct> findAllByOrderId(UUID orderId);
+    Flux<OrderProduct> findAllByOrderId(String orderId);
 
 }

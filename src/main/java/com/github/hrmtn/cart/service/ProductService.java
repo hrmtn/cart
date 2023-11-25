@@ -22,8 +22,8 @@ public class ProductService {
                 .switchIfEmpty(Mono.error(new RuntimeException("Product not found")));
     }
 
-    public Mono<Product> findById(UUID id) {
-        return productRepository.findById(id.toString())
+    public Mono<Product> findById(String id) {
+        return productRepository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Product not found")));
     }
 
