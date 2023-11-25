@@ -19,25 +19,30 @@ public class CartService {
 
     public Mono<Void> addToCart(CartItem cartItem) {
 
-        // add product to cart, if product is already in cart, update quantity
-        return cartItemRepository.findCartItemByProductIdAndUserId(cartItem.getProductId(), cartItem.getUserId())
-            .flatMap(ci -> {
-                ci.setQuantity(ci.getQuantity() + cartItem.getQuantity());
-                return cartItemRepository.updateQuantity(User.USER_ID, ci.getProductId(), ci.getQuantity())
-                        .then(Mono.fromCallable(() -> cartItem));
-            })
-            .switchIfEmpty(cartItemRepository.save(cartItem))
-            .flatMap(ci -> {
-                // update product quantity
-                return productService.findById(UUID.fromString(ci.getProductId()))
-                    .flatMap(product -> {
-                        product.setQuantity(product.getQuantity() - ci.getQuantity());
-                        return productService.save(product);
-                    });
-            })
-            .then();
-    }
 
+        return productService.findById(UUID.fromString(cartItem.getProductId()))
+                .map(product -> {
+                    if (product.getQuantity() < cartItem.getQuantity())
+                        throw new RuntimeException("Product out of stock");
+                    return product;
+                })
+                .flatMap(product -> cartItemRepository.findCartItemByProductIdAndUserId(cartItem.getProductId(), cartItem.getUserId()))
+                .flatMap(ci -> {
+                    ci.setQuantity(ci.getQuantity() + cartItem.getQuantity());
+                    return cartItemRepository.updateQuantity(User.USER_ID, ci.getProductId(), ci.getQuantity())
+                            .then(Mono.fromCallable(() -> cartItem));
+                })
+                .switchIfEmpty(cartItemRepository.save(cartItem))
+                .flatMap(ci -> {
+                    // update product quantity
+                    return productService.findById(UUID.fromString(ci.getProductId()))
+                            .flatMap(product -> {
+                                product.setQuantity(product.getQuantity() - ci.getQuantity());
+                                return productService.save(product);
+                            });
+                })
+                .then();
+    }
 
     public Flux<CartItem> getCartProducts() {
         return cartItemRepository.findAllByUserId(User.USER_ID);
