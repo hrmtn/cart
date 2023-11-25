@@ -2,6 +2,7 @@ package com.github.hrmtn.cart.service;
 
 import com.github.hrmtn.cart.domain.*;
 import com.github.hrmtn.cart.dto.OrderDetails;
+import com.github.hrmtn.cart.messaging.orders.ValidatedOrdersMessagesProducer;
 import com.github.hrmtn.cart.repository.CartItemRepository;
 import com.github.hrmtn.cart.repository.OrderRepository;
 import com.github.hrmtn.cart.repository.OrdersProductsRepository;
@@ -23,6 +24,7 @@ public class OrderService {
     private final OrdersProductsRepository ordersProductsRepository;
     private final ProductService productService;
     private final CartItemRepository cartItemRepository;
+    private final ValidatedOrdersMessagesProducer validatedOrdersMessagesProducer;
 
     public Mono<String> getStatus(UUID id) {
         return orderRepository.findById(id).map(Order::getOrderStatus);
@@ -98,7 +100,8 @@ public class OrderService {
                 .flatMap(orderProduct -> cartItemRepository.deleteAllByProductIdAndUserId(String.valueOf(orderProduct.getProductId()), User.USER_ID)
                         .thenReturn(orderProduct.getOrderId()))
                 .last()
-                .map(UUID::fromString);
+                .map(UUID::fromString)
+                .doOnNext(orderId -> validatedOrdersMessagesProducer.sendMessage(order));
 
     }
 

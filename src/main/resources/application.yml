@@ -7,3 +7,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/cart
     user: root
     password: root
+
+  kafka:
+    bootstrap-servers: localhost:9092
+

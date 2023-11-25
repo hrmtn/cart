@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.github.hrmtn'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 
 java {
 	sourceCompatibility = '21'
@@ -37,6 +37,7 @@ dependencies {
 	implementation 'org.postgresql:r2dbc-postgresql:1.0.2.RELEASE'
 	implementation 'org.flywaydb:flyway-core:9.14.1'
 	implementation 'org.postgresql:postgresql:42.5.4' // for flyway
+	implementation 'org.springframework.kafka:spring-kafka'
 }
 
 tasks.named('test') {
