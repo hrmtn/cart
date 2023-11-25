@@ -16,6 +16,8 @@ import java.util.UUID;
 @Table("products")
 public class Product implements Persistable<UUID> {
 
+    public static final String AVAILABLE_PRODUCTS_CACHE_NAME = "available_products";
+
     @Id
     private UUID id;
     private String name;
