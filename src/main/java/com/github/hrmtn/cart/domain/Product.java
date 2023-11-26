@@ -9,7 +9,6 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 @Builder
