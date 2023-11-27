@@ -61,8 +61,6 @@ docker exec -ti kafka /opt/kafka/bin/kafka-console-consumer.sh \
 
 
 ### TODO
-Tests
-
 Deploy to k8s
 
 Native image
