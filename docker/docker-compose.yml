@@ -16,7 +16,7 @@ services:
 
   cart-service:
     container_name: cart-service
-    image: cart:0.0.2-SNAPSHOT
+    image: hrmtn/cart:0.0.2-SNAPSHOT
     ports:
       - '8080:8080'
     environment:
